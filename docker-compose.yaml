@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  parser:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./logs.log:/app/logs.log
+      - ./.env:/app/.env
+    env_file:
+      - .env
+
+volumes:
+  logs.log:
+  .env:

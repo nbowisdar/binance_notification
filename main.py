@@ -1,9 +1,11 @@
+from pprint import pprint
 from binance import ThreadedWebsocketManager
 from loguru import logger
 from dotenv import load_dotenv
 from os import getenv
 from telebot import TeleBot
 import time
+import messages
 
 load_dotenv()
 
@@ -11,41 +13,50 @@ API_KEY = getenv("API_KEY")
 API_SECRET = getenv("API_SECRET")
 TELEGRAM_TOKEN = getenv("TELEGRAM_TOKEN")
 CHAT_ID = getenv("CHAT_ID")
+TESTNET = getenv("TESTNET").casefold()
+if TESTNET == "true":
+    TESTNET = True
+else:
+    TESTNET = False
 
 logger.add("logs.log", rotation="500 MB", compression="zip")
 bot = TeleBot(TELEGRAM_TOKEN, parse_mode="HTML")
 
 
-ignore_events = ["WITHDRAW", "DEPOSIT"]
+# last_market_orders = None
+orders = {}
 
 
-def build_message(data: dict) -> str:
-    # TODO build right message
-    resp = ""
-    ud: str = data["a"]
-
-    if ud["m"].upper() in ignore_events:
-        logger.debug("Ignore event")
+def build_message(data: dict) -> str | None:
+    msg = None
+    if data["e"] != "ORDER_TRADE_UPDATE":
         return
+    logger.debug(data)
+    order_data = data["o"]
+    order_id = order_data["i"]
+    match order_data["x"]:
+        case "NEW":
+            # if order_data["o"] == "MARKET":.
+            orders[order_id] = order_data
+            if not order_data["o"] == "MARKET":
+                msg = messages.new_order(order_data)
+        case "TRADE":
+            if order_data["o"] == "LIMIT":
+                msg = messages.limit(order_data)
+            elif order_data["X"] == "FILLED":
+                order = orders.get(order_id)
+                if order:
+                    msg = messages.market(order, order_data)
+                    del orders[order_id]
+        case "TAKE_PROFIT":
+            msg = messages.limit(order_data)
 
-    resp += f"Operation: {ud['m']}\n"
-
-    if ud["B"]:
-        for items in ud["B"]:
-            for k, v in items.items():
-                resp += f"{k}: {v}\n"
-
-    if ud["P"]:
-        for items in ud["P"]:
-            for k, v in items.items():
-                resp += f"{k}: {v}\n"
-
-    return resp
+    return msg
 
 
 def handle_event(data: dict):
-    logger.debug(data)
     msg = build_message(data)
+    # msg = None
     if msg:
         bot.send_message(CHAT_ID, msg)
 
@@ -53,7 +64,8 @@ def handle_event(data: dict):
 @logger.catch
 def handling_updates():
     # client = await AsyncClient.create(api_key, api_secret)
-    twm = ThreadedWebsocketManager(API_KEY, API_SECRET)
+    twm = ThreadedWebsocketManager(API_KEY, API_SECRET, testnet=TESTNET)
+    # twm = ThreadedWebsocketManager(API_KEY, API_SECRET)
 
     twm.start()
 
@@ -62,7 +74,9 @@ def handling_updates():
 
 
 def main():
-    bot.send_message(CHAT_ID, "Bot started")
+    logger.debug("Bot started")
+    print(f"API Key - {API_KEY}")
+    print(f"SECRET Key - {API_SECRET}")
     while True:
         handling_updates()
         logger.debug("Sleep for 60 sec")
