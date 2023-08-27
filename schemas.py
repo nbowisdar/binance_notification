@@ -1,0 +1,43 @@
+from typing import NamedTuple
+
+
+class OrderDataBybit(NamedTuple):
+    avgPrice: str
+    blockTradeId: str
+    cancelType: str
+    category: str
+    closeOnTrigger: bool
+    createdTime: str
+    cumExecFee: str
+    cumExecQty: str
+    cumExecValue: str
+    feeCurrency: str
+    isLeverage: str
+    lastPriceOnCreated: str
+    leavesQty: str
+    leavesValue: str
+    orderId: str
+    orderIv: str
+    orderLinkId: str
+    orderStatus: str
+    orderType: str
+    positionIdx: int
+    price: str
+    qty: str
+    reduceOnly: bool
+    rejectReason: str
+    side: str
+    slTriggerBy: str
+    smpGroup: int
+    smpOrderId: str
+    smpType: str
+    stopLoss: str
+    stopOrderType: str
+    symbol: str
+    takeProfit: str
+    timeInForce: str
+    tpTriggerBy: str
+    triggerBy: str
+    triggerDirection: int
+    triggerPrice: str
+    updatedTime: str
