@@ -41,3 +41,37 @@ class OrderDataBybit(NamedTuple):
     triggerDirection: int
     triggerPrice: str
     updatedTime: str
+    placeType: str = None
+    # slLimitPrice: str = None
+
+
+class PositionDataBybit(NamedTuple):
+    bustPrice: str
+    category: str
+    createdTime: str
+    cumRealisedPnl: str
+    entryPrice: str
+    leverage: str
+    liqPrice: str
+    markPrice: str
+    positionBalance: str
+    positionIdx: int
+    positionMM: str
+    positionIM: str
+    positionStatus: str
+    positionValue: str
+    riskId: int
+    riskLimitValue: str
+    side: str
+    size: str
+    stopLoss: str
+    symbol: str
+    takeProfit: str
+    tpslMode: str
+    tradeMode: int
+    autoAddMargin: int
+    trailingStop: str
+    unrealisedPnl: str
+    updatedTime: str
+    adlRankIndicator: int
+    slLimitPrice: str = None

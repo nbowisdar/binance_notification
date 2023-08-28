@@ -1,3 +1,5 @@
 venv
 .env
 logs.log
+__pycache__/schemas.cpython-311.pyc
+testing.py
